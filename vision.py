@@ -67,6 +67,51 @@ def extract_error(image_bytes: bytes, mime_type: str) -> dict:
     }
 
 
+def normalize_error_input(
+    error_text: str = "",
+    image_bytes: bytes | None = None,
+    mime_type: str | None = None,
+    context: str = "",
+) -> dict:
+    """텍스트 또는 스크린샷(또는 둘 다)을 공통 형식으로 변환.
+
+    Returns:
+        {"input_type": "text"|"image"|"mixed", "error_text": str,
+         "code_snippet": str, "context": str, "raw_ocr_text": str}
+    """
+    if error_text and not image_bytes:
+        return {
+            "input_type": "text",
+            "error_text": error_text,
+            "code_snippet": "",
+            "context": context,
+            "raw_ocr_text": "",
+        }
+
+    if image_bytes:
+        ocr_result = extract_error(image_bytes, mime_type)  # 기존 검증된 함수 재사용
+
+        if error_text:
+            # mixed: 에러 메시지는 사용자 입력 우선, 코드는 OCR 결과로 보완
+            return {
+                "input_type": "mixed",
+                "error_text": error_text,
+                "code_snippet": ocr_result["code_snippet"],
+                "context": context,
+                "raw_ocr_text": ocr_result["raw_ocr_text"],
+            }
+
+        return {
+            "input_type": "image",
+            "error_text": ocr_result["error_text"],
+            "code_snippet": ocr_result["code_snippet"],
+            "context": context,
+            "raw_ocr_text": ocr_result["raw_ocr_text"],
+        }
+
+    raise ValueError("error_text와 image_bytes 중 최소 하나는 있어야 합니다.")
+
+
 if __name__ == "__main__":
     # 단독 테스트용 — A/C/D 담당 코드 없이도 바로 실행 가능
     # 프로젝트 루트에 test_error_screenshot.png 를 넣고 실행하면 됨
