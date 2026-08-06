@@ -260,6 +260,24 @@ def _load_corpus_stats() -> tuple[int, int, int, list[dict]]:
 
 
 with st.sidebar:
+    st.markdown(
+        """
+        <style>
+        [data-testid="stSidebar"] { font-size: 0.82rem; }
+        [data-testid="stSidebar"] h1 { font-size: 1.05rem !important; color: #6b7280 !important; }
+        [data-testid="stSidebar"] h3 { font-size: 0.88rem !important; color: #6b7280 !important; }
+        [data-testid="stSidebar"] p,
+        [data-testid="stSidebar"] span,
+        [data-testid="stSidebar"] label,
+        [data-testid="stSidebar"] div[data-testid="stMarkdownContainer"] { color: #6b7280 !important; }
+        [data-testid="stSidebar"] [data-testid="stMetricValue"] { font-size: 1.3rem !important; color: #6b7280 !important; }
+        [data-testid="stSidebar"] [data-testid="stMetricLabel"] { font-size: 0.72rem !important; color: #9ca3af !important; }
+        [data-testid="stSidebar"] code { font-size: 0.75rem !important; }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
     st.title("🐛 Bug Agent")
 
     if st.button("＋ 새 오류 분석", use_container_width=True):
