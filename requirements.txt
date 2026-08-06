@@ -1,4 +1,5 @@
 ddgs==9.14.4
+streamlit
 langgraph==1.2.10
 langgraph-checkpoint==4.1.1
 langgraph-prebuilt==1.1.0
