@@ -197,6 +197,7 @@ def _same_root_cause(root_cause_a: str, root_cause_b: str) -> bool:
             ),
         }],
         max_tokens=200,
+        temperature=0,
     )
     return "yes" in (resp.choices[0].message.content or "").strip().lower()
 
@@ -213,7 +214,12 @@ def recurrence_node(state: AnalysisState) -> dict:
     if not candidate:
         return {"match_type": "new", "matched_case": None}
 
-    if score > 0.85 and _same_root_cause(state.get("root_cause", ""), candidate.get("root_cause", "")):
+    # 검색 점수가 매우 높으면(사실상 동일 텍스트) LLM 재확인 없이 바로 confirmed 처리.
+    # _same_root_cause()는 temperature=0이어도 reasoning 모델 특성상 완전히 결정적이지
+    # 않아서, 완전히 동일한 에러를 재입력하는 데모 시나리오가 가끔 possible로 새는 걸 막는다.
+    if score > 0.95:
+        match_type = "confirmed"
+    elif score > 0.85 and _same_root_cause(state.get("root_cause", ""), candidate.get("root_cause", "")):
         match_type = "confirmed"
     elif score > 0.5:
         match_type = "possible"
