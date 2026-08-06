@@ -189,10 +189,12 @@ def _next_id(cases: list[dict[str, Any]]) -> str:
 
 
 def upsert_bug_case(record: dict, match_type: str, matched_case_id: str | None) -> None:
-    """Persist an approved result and rebuild the in-memory embedding index.
+    """Persist an approved result without re-embedding the untouched corpus.
 
-    Only an explicitly confirmed match updates an existing case. Possible and
-    new findings intentionally become independent BugCases for later review.
+    Only an explicitly confirmed match updates an existing case — that only
+    changes occurrence_count/last_seen_at, so no re-embedding is needed.
+    Possible and new findings become independent BugCases; only the new
+    case's own document is embedded, not the whole corpus.
     """
     global _cases, _embeddings
     cases = _load_cases()
@@ -204,7 +206,12 @@ def upsert_bug_case(record: dict, match_type: str, matched_case_id: str | None) 
             existing["occurrence_count"] = int(existing.get("occurrence_count", 0)) + 1
             existing["last_seen_at"] = now
             _write_cases(cases)
-            _rebuild_index()
+            if _cases is not None:
+                for cached in _cases:
+                    if cached.get("id") == matched_case_id:
+                        cached["occurrence_count"] = existing["occurrence_count"]
+                        cached["last_seen_at"] = now
+                        break
             return
 
     new_case = dict(record)
@@ -214,4 +221,7 @@ def upsert_bug_case(record: dict, match_type: str, matched_case_id: str | None) 
     new_case["last_seen_at"] = now
     cases.append(new_case)
     _write_cases(cases)
-    _rebuild_index()
+
+    if _cases is not None and _embeddings is not None:
+        _cases.append(new_case)
+        _embeddings.extend(_embed_texts([build_document(new_case)]))
