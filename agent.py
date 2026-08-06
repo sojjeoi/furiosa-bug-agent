@@ -313,8 +313,8 @@ def render_document(record: dict, match_type: str, matched_case: dict | None) ->
 def aggregator_node(state: AnalysisState) -> dict:
     extracted = {"error_text": state["error_text"], "code_snippet": state.get("code_snippet", "")}
     record = build_bug_record(extracted, state)
-    markdown = render_document(record, state["match_type"], state.get("matched_case"))
-    return {"final_result": {"record": record, "markdown": markdown}}
+    # markdown은 D(ui.py)가 렌더링을 전담한다 — 여기서는 구조화된 record만 만든다.
+    return {"final_result": {"record": record, "markdown": ""}}
 
 
 # ---------------------------------------------------------------------------

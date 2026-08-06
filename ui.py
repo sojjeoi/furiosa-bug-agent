@@ -68,19 +68,24 @@ def render_document(record: dict, match_type: str, matched_case: dict | None) ->
         "#### 즉시 조치",
         record.get("immediate_fix", "—"),
         "",
-        "#### 예방 조치",
+        "#### 재발 방지 제안 (아직 적용되지 않음)",
     ]
     actions = record.get("prevention_actions") or []
     lines += [f"- {a}" for a in actions] if actions else ["—"]
 
     if matched_case:
+        score = matched_case.get("reranker_score")
+        score_text = f"{score:.2f}" if isinstance(score, (int, float)) else "—"
+        seen_at = (matched_case.get("first_seen_at") or "")[:10] or "—"
         lines += [
             "",
             "---",
             "",
             "#### 참고한 과거 사례",
-            f"- **{matched_case.get('id', '')}** — {matched_case.get('context', '')}",
-            f"- 원인: {matched_case.get('root_cause', '')}",
+            f"- **{matched_case.get('id', '')}** (발생일: {seen_at}, 검색 점수: {score_text})",
+            f"- 상황: {matched_case.get('context', '')}",
+            f"- 당시 원인: {matched_case.get('root_cause', '')}",
+            f"- 당시 해결: {matched_case.get('immediate_fix', '')}",
             f"- 환경: {matched_case.get('environment', '')}",
         ]
 
