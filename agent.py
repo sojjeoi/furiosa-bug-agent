@@ -110,9 +110,14 @@ def _parse_json_block(raw_text: str) -> dict:
 def root_cause_node(state: AnalysisState) -> dict:
     messages = [
         {"role": "system", "content": (
-            "당신은 시니어 소프트웨어 엔지니어입니다. 주어진 에러 메시지와 코드를 보고 "
-            "근본원인을 2~4문장으로 간결하게 한국어로 설명하세요. 표면적 증상이 아니라 "
-            "왜 그 상태가 발생했는지(예: 검증 누락, 잘못된 가정)를 짚어주세요."
+            "[역할] 당신은 시니어 소프트웨어 엔지니어입니다.\n"
+            "[과업] 주어진 에러 메시지와 코드를 보고 근본원인을 분석하세요. "
+            "표면적 증상이 아니라 왜 그 상태가 발생했는지(예: 검증 누락, 잘못된 가정)를 짚어야 합니다.\n"
+            "[형식] 2~4문장, 한국어로 간결하게 서술.\n\n"
+            "예시)\n"
+            "입력 - 에러: KeyError: 'user_id' / 코드: session = payload['user_id']\n"
+            "출력 - payload 딕셔너리에 'user_id' 키가 없는데 존재를 가정하고 바로 접근했기 때문에 "
+            "발생합니다. 요청 페이로드에 해당 필드가 항상 포함된다는 검증 없이 접근한 것이 근본 원인입니다."
         )},
         {"role": "user", "content": (
             f"에러: {state['error_text']}\n"
@@ -135,10 +140,12 @@ def similar_case_node(state: AnalysisState) -> dict:
 
     messages = [
         {"role": "system", "content": (
-            "내부 코퍼스 검색 결과에는 각 후보의 reranker_score(0~1)가 포함되어 있습니다. "
-            "규칙: 후보가 없거나, 최상위 후보의 reranker_score가 0.5 미만이면 "
-            "반드시 web_search 도구를 호출해 외부 정보를 보강하세요. "
-            "reranker_score가 0.5 이상인 후보가 있으면 도구를 호출하지 말고 그 후보를 그대로 신뢰하세요."
+            "[역할] 당신은 버그 사례 검색 결과를 검토하는 전문가입니다.\n"
+            "[맥락] 내부 코퍼스 검색 결과에는 각 후보의 reranker_score(0~1, 관련도 점수)가 포함되어 있습니다.\n"
+            "[과업] 아래 규칙에 따라 판단하세요.\n"
+            "  - 후보가 없거나 최상위 후보의 reranker_score가 0.5 미만 → 반드시 web_search 도구를 호출\n"
+            "  - reranker_score가 0.5 이상인 후보가 있음 → 도구를 호출하지 말고 그 후보를 그대로 신뢰\n"
+            "[형식] 위 규칙에 따라 도구를 호출하거나, 호출 없이 응답을 종료합니다."
         )},
         {"role": "user", "content": (
             f"에러: {state['error_text']}\n"
@@ -223,10 +230,17 @@ def prevention_node(state: AnalysisState) -> dict:
     matched_case = state.get("matched_case") or {}
     messages = [
         {"role": "system", "content": (
-            "다음 정보를 보고 JSON으로만 답하세요. 다른 설명은 붙이지 마세요.\n"
+            "[역할] 당신은 재발 방지 대책을 제안하는 시니어 엔지니어입니다.\n"
+            "[과업] 근본원인·재발판정·기존 유사사례·외부근거를 참고해 즉시조치와 재발방지책을 제안하세요.\n"
+            "[형식] 다음 JSON으로만 답하세요. 다른 설명은 붙이지 마세요.\n"
             '{"immediate_fix": "지금 바로 적용할 수 있는 임시 조치 한 문장", '
             '"prevention_actions": ["재발 방지 조치1", "재발 방지 조치2"], '
-            '"tags": ["관련 키워드1", "관련 키워드2"]}'
+            '"tags": ["관련 키워드1", "관련 키워드2"]}\n\n'
+            "예시)\n"
+            "입력 - 근본원인: payload에 user_id 키가 없는데 검증 없이 접근\n"
+            '출력 - {"immediate_fix": "payload.get(\\"user_id\\")로 안전하게 접근", '
+            '"prevention_actions": ["요청 스키마 검증 미들웨어 추가", "필수 필드 누락 회귀 테스트 추가"], '
+            '"tags": ["KeyError", "payload", "validation"]}'
         )},
         {"role": "user", "content": (
             f"근본원인: {state.get('root_cause', '')}\n"

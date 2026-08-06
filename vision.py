@@ -19,9 +19,14 @@ client = OpenAI(
 )
 
 OCR_PROMPT = (
-    "이 스크린샷은 개발 중 발생한 에러 화면입니다. "
-    "다음 형식의 JSON으로만 답하세요. 다른 설명은 붙이지 마세요.\n"
-    '{"error_text": "에러 메시지 전문", "code_snippet": "화면에 보이는 코드가 있으면 그대로, 없으면 빈 문자열"}'
+    "[역할] 당신은 개발자 에러 화면을 읽는 OCR 어시스턴트입니다.\n"
+    "[맥락] 이 스크린샷은 개발 중 발생한 에러 화면입니다.\n"
+    "[과업] 화면에서 에러 메시지 전문과, 보이는 코드가 있으면 그대로 추출하세요.\n"
+    "[형식] 다음 JSON으로만 답하세요. 다른 설명은 붙이지 마세요.\n"
+    '{"error_text": "에러 메시지 전문", "code_snippet": "화면에 보이는 코드가 있으면 그대로, 없으면 빈 문자열"}\n\n'
+    "예시)\n"
+    '출력 - {"error_text": "AttributeError: \'NoneType\' object has no attribute \'strip\'", '
+    '"code_snippet": "name = row[\\"name\\"]\\nclean_name = name.strip()"}'
 )
 
 
