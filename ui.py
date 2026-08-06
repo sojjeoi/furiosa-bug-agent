@@ -9,7 +9,9 @@ normalize_error_input만 vision에서 가져오면 된다. (.env에 FURIOSA_VL_A
 """
 
 import hashlib
+import json
 import os
+from pathlib import Path
 
 import streamlit as st
 from dotenv import load_dotenv
@@ -126,13 +128,6 @@ st.caption(
     "승인한 기록만 코퍼스에 쌓입니다."
 )
 
-with st.sidebar:
-    st.subheader("업로드 전 확인")
-    st.markdown(
-        "- 스크린샷·에러 텍스트에 **API 키·토큰·내부 경로**가 보이면 가려서 올려주세요.\n"
-        "- 자동 마스킹은 이번 스코프에 없습니다."
-    )
-
 # --- 입력 -------------------------------------------------------------------
 # B의 normalize_error_input()이 텍스트 / 이미지 / 둘 다(mixed)를 모두 처리한다.
 st.subheader("1. 에러 입력")
@@ -246,3 +241,54 @@ if analysis:
             if st.button("다시 분석"):
                 reset_analysis()
                 st.rerun()
+
+# ===========================================================================
+# 사이드바 — 스크립트 맨 끝에 둬서 이번 실행에서 계산된 최신 analysis를 반영
+# ===========================================================================
+def _load_corpus_stats() -> tuple[int, int, int, list[dict]]:
+    corpus_path = Path(__file__).with_name("bugs.json")
+    try:
+        with corpus_path.open("r", encoding="utf-8") as f:
+            cases = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        cases = []
+    total = len(cases)
+    recurrence = sum(1 for c in cases if int(c.get("occurrence_count", 1) or 1) > 1)
+    monitoring = sum(1 for c in cases if c.get("status") == "monitoring")
+    recent = sorted(cases, key=lambda c: c.get("last_seen_at", ""), reverse=True)[:3]
+    return total, recurrence, monitoring, recent
+
+
+with st.sidebar:
+    st.title("🐛 Bug Agent")
+
+    if st.button("＋ 새 오류 분석", use_container_width=True):
+        reset_analysis()
+        st.rerun()
+
+    st.subheader("현재 진행 상황")
+    if analysis:
+        st.markdown("✅ 오류 추출  \n✅ 과거 사례 검색  \n✅ 원인 분석  \n⏳ 사용자 확인 대기")
+    else:
+        st.markdown("⏳ 오류 입력 대기  \n◻ 과거 사례 검색  \n◻ 원인 분석  \n◻ 사용자 확인")
+
+    st.divider()
+    st.subheader("팀 지식베이스")
+    total_cases, recurrence_cases, monitoring_cases, recent_cases = _load_corpus_stats()
+    col_a, col_b = st.columns(2)
+    col_a.metric("등록 사례", total_cases)
+    col_b.metric("재발 사례", recurrence_cases)
+    st.metric("조치 대기", monitoring_cases)
+
+    if recent_cases:
+        st.caption("최근 등록 사례")
+        for c in recent_cases:
+            st.markdown(f"- `{c.get('id', '')}` {c.get('error_type', '')}")
+
+    st.divider()
+    with st.expander("업로드 전 보안 확인"):
+        st.markdown(
+            "- API 키·토큰을 가려주세요.\n"
+            "- 민감한 내부 경로를 확인해주세요.\n"
+            "- 자동 마스킹은 지원하지 않습니다."
+        )
