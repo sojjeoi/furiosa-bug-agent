@@ -1,0 +1,120 @@
+[
+  {
+    "id": "bug_001",
+    "fingerprint": "attributeerror|nonetype-strip|name-field-validation",
+    "error_type": "AttributeError",
+    "error_message": "'NoneType' object has no attribute 'strip'",
+    "environment": "Python 3.11, pandas 2.1.0",
+    "context": "CSV로 읽은 사용자 이름 처리 중 발생",
+    "root_cause": "row[\"name\"]에 None이 들어왔는데 문자열 검증 없이 strip()을 호출했다. 입력 데이터 스키마 검증이 없다.",
+    "immediate_fix": "None 검사 또는 기본값 처리(df.fillna 또는 조건문)를 추가한다.",
+    "prevention_actions": ["입력 스키마 검증 로직 추가", "None 입력 회귀 테스트 추가"],
+    "external_sources": [], "status": "monitoring", "occurrence_count": 1,
+    "first_seen_at": "2026-08-05T10:00:00+00:00", "last_seen_at": "2026-08-05T10:00:00+00:00",
+    "tags": ["pandas", "AttributeError", "input-validation"]
+  },
+  {
+    "id": "bug_002", "fingerprint": "attributeerror|nonetype-strip|profile-optional",
+    "error_type": "AttributeError", "error_message": "'NoneType' object has no attribute 'strip'",
+    "environment": "Python 3.11, FastAPI 0.115", "context": "선택 프로필 필드를 정규화하는 API에서 발생",
+    "root_cause": "데이터베이스 조회 결과가 없을 수 있는데 서비스 계층이 항상 객체가 있다고 가정했다.",
+    "immediate_fix": "조회 결과가 None이면 404 또는 기본 응답을 반환한다.",
+    "prevention_actions": ["optional 반환 타입을 명시", "미존재 사용자 API 테스트 추가"],
+    "external_sources": [], "status": "open", "occurrence_count": 1,
+    "first_seen_at": "2026-08-04T09:00:00+00:00", "last_seen_at": "2026-08-04T09:00:00+00:00",
+    "tags": ["FastAPI", "AttributeError", "optional"]
+  },
+  {
+    "id": "bug_003", "fingerprint": "keyerror|user-id", "error_type": "KeyError", "error_message": "'user_id'",
+    "environment": "Python 3.11, FastAPI 0.115", "context": "외부 webhook payload 처리 중 발생",
+    "root_cause": "공급자가 전송하는 이벤트 종류별 payload 구조가 다른데 공통 키가 있다고 가정했다.",
+    "immediate_fix": "키 존재 여부를 검사하고 이벤트 유형별 파서를 분리한다.",
+    "prevention_actions": ["payload 스키마 검증 추가", "이벤트 유형별 fixture 테스트 추가"],
+    "external_sources": [], "status": "monitoring", "occurrence_count": 2,
+    "first_seen_at": "2026-07-25T10:00:00+00:00", "last_seen_at": "2026-08-02T10:00:00+00:00", "tags": ["webhook", "KeyError"]
+  },
+  {
+    "id": "bug_004", "fingerprint": "typeerror|unsupported-operand", "error_type": "TypeError", "error_message": "unsupported operand type(s) for +: 'int' and 'str'",
+    "environment": "Python 3.11, pandas 2.1.0", "context": "CSV 금액 합계 계산 중 발생",
+    "root_cause": "숫자 열에 통화 기호가 포함된 문자열이 들어와 형 변환 없이 덧셈했다.", "immediate_fix": "금액 열을 숫자로 정규화한다.",
+    "prevention_actions": ["CSV 열 타입 검증", "통화 문자열 입력 테스트"], "external_sources": [], "status": "mitigated", "occurrence_count": 1,
+    "first_seen_at": "2026-07-21T10:00:00+00:00", "last_seen_at": "2026-07-21T10:00:00+00:00", "tags": ["pandas", "TypeError"]
+  },
+  {
+    "id": "bug_005", "fingerprint": "operationalerror|database-locked", "error_type": "OperationalError", "error_message": "database is locked",
+    "environment": "Python 3.11, SQLite 3", "context": "배치 작업과 웹 요청이 동시에 SQLite를 기록할 때 발생",
+    "root_cause": "동시 쓰기 트랜잭션이 길게 유지되어 SQLite의 단일 writer 제한에 걸렸다.", "immediate_fix": "트랜잭션 범위를 줄이고 재시도를 추가한다.",
+    "prevention_actions": ["쓰기 큐 도입 검토", "동시성 부하 테스트"], "external_sources": [], "status": "open", "occurrence_count": 3,
+    "first_seen_at": "2026-07-18T10:00:00+00:00", "last_seen_at": "2026-08-03T10:00:00+00:00", "tags": ["SQLite", "concurrency"]
+  },
+  {
+    "id": "bug_006", "fingerprint": "validationerror|email", "error_type": "ValidationError", "error_message": "value is not a valid email address",
+    "environment": "Python 3.11, Pydantic 2", "context": "관리자 초대 폼 제출 시 발생",
+    "root_cause": "프런트엔드 입력값 앞뒤 공백을 제거하지 않아 유효한 이메일이 검증에서 제외됐다.", "immediate_fix": "서버에서 이메일을 trim한 뒤 검증한다.",
+    "prevention_actions": ["입력 정규화 공통화", "공백 포함 이메일 테스트"], "external_sources": [], "status": "mitigated", "occurrence_count": 1,
+    "first_seen_at": "2026-07-17T10:00:00+00:00", "last_seen_at": "2026-07-17T10:00:00+00:00", "tags": ["Pydantic", "validation"]
+  },
+  {
+    "id": "bug_007", "fingerprint": "filenotfounderror|config-yaml", "error_type": "FileNotFoundError", "error_message": "[Errno 2] No such file or directory: 'config.yaml'",
+    "environment": "Python 3.11, Docker", "context": "컨테이너 배포 후 설정 파일 로드 중 발생",
+    "root_cause": "Docker image에 설정 파일을 복사하지 않았고 상대 경로에 의존했다.", "immediate_fix": "설정 파일을 image에 포함하고 절대 설정 경로를 사용한다.",
+    "prevention_actions": ["컨테이너 smoke test", "배포 artifact 검사"], "external_sources": [], "status": "mitigated", "occurrence_count": 1,
+    "first_seen_at": "2026-07-15T10:00:00+00:00", "last_seen_at": "2026-07-15T10:00:00+00:00", "tags": ["Docker", "configuration"]
+  },
+  {
+    "id": "bug_008", "fingerprint": "timeout|read-timeout", "error_type": "ReadTimeout", "error_message": "HTTPSConnectionPool: Read timed out",
+    "environment": "Python 3.11, requests 2.32", "context": "외부 결제 API 호출 중 발생",
+    "root_cause": "외부 의존성 지연을 고려하지 않고 고정 timeout과 재시도 없는 단일 호출을 사용했다.", "immediate_fix": "연결과 읽기 timeout을 분리하고 제한된 재시도를 적용한다.",
+    "prevention_actions": ["외부 API timeout 정책", "장애 대체 경로 정의"], "external_sources": [], "status": "monitoring", "occurrence_count": 2,
+    "first_seen_at": "2026-07-10T10:00:00+00:00", "last_seen_at": "2026-08-01T10:00:00+00:00", "tags": ["HTTP", "timeout"]
+  },
+  {
+    "id": "bug_009", "fingerprint": "permissionerror|uploads", "error_type": "PermissionError", "error_message": "[Errno 13] Permission denied: '/app/uploads'",
+    "environment": "Python 3.11, Linux", "context": "파일 업로드 저장 중 발생",
+    "root_cause": "컨테이너 실행 계정에 mount 경로의 쓰기 권한이 없었다.", "immediate_fix": "mount 소유권과 컨테이너 사용자 권한을 맞춘다.",
+    "prevention_actions": ["배포 전 권한 점검", "비root 컨테이너 테스트"], "external_sources": [], "status": "open", "occurrence_count": 1,
+    "first_seen_at": "2026-07-12T10:00:00+00:00", "last_seen_at": "2026-07-12T10:00:00+00:00", "tags": ["Linux", "permissions"]
+  },
+  {
+    "id": "bug_010", "fingerprint": "jsondecodeerror|expecting-value", "error_type": "JSONDecodeError", "error_message": "Expecting value: line 1 column 1 (char 0)",
+    "environment": "Python 3.11, requests 2.32", "context": "외부 API 오류 응답을 JSON으로 파싱할 때 발생",
+    "root_cause": "오류 상태 코드에서 빈 본문 또는 HTML이 올 수 있는데 성공 JSON만 가정했다.", "immediate_fix": "상태 코드와 Content-Type을 확인한 뒤 JSON을 파싱한다.",
+    "prevention_actions": ["오류 응답 fixture 테스트", "API 응답 검증 공통화"], "external_sources": [], "status": "monitoring", "occurrence_count": 1,
+    "first_seen_at": "2026-07-09T10:00:00+00:00", "last_seen_at": "2026-07-09T10:00:00+00:00", "tags": ["JSON", "HTTP"]
+  },
+  {
+    "id": "bug_011", "fingerprint": "indexerror|list-index-out-of-range", "error_type": "IndexError", "error_message": "list index out of range",
+    "environment": "Python 3.11", "context": "검색 결과 첫 항목을 표시할 때 발생",
+    "root_cause": "빈 검색 결과를 고려하지 않고 첫 번째 요소에 직접 접근했다.", "immediate_fix": "결과 목록이 비어 있는 경우를 먼저 처리한다.",
+    "prevention_actions": ["빈 결과 테스트 추가", "optional 결과 처리 규칙화"], "external_sources": [], "status": "mitigated", "occurrence_count": 1,
+    "first_seen_at": "2026-07-08T10:00:00+00:00", "last_seen_at": "2026-07-08T10:00:00+00:00", "tags": ["IndexError", "edge-case"]
+  },
+  {
+    "id": "bug_012", "fingerprint": "unicodeencodeerror|ascii", "error_type": "UnicodeEncodeError", "error_message": "'ascii' codec can't encode character",
+    "environment": "Python 3.11, CSV", "context": "한글 사용자 이름이 포함된 CSV 내보내기 중 발생",
+    "root_cause": "출력 인코딩을 ASCII로 고정해 비ASCII 문자를 처리하지 못했다.", "immediate_fix": "UTF-8 인코딩을 명시한다.",
+    "prevention_actions": ["다국어 fixture 추가", "파일 인코딩 정책 문서화"], "external_sources": [], "status": "mitigated", "occurrence_count": 1,
+    "first_seen_at": "2026-07-07T10:00:00+00:00", "last_seen_at": "2026-07-07T10:00:00+00:00", "tags": ["encoding", "CSV"]
+  },
+  {
+    "id": "bug_013", "fingerprint": "connectionerror|refused", "error_type": "ConnectionError", "error_message": "Connection refused",
+    "environment": "Python 3.11, Redis", "context": "캐시 서버 재시작 직후 연결 중 발생",
+    "root_cause": "애플리케이션이 Redis 준비 상태보다 먼저 시작했고 연결 재시도가 없었다.", "immediate_fix": "지수 backoff 재시도를 추가한다.",
+    "prevention_actions": ["health check 의존성 설정", "시작 순서 통합 테스트"], "external_sources": [], "status": "monitoring", "occurrence_count": 2,
+    "first_seen_at": "2026-07-06T10:00:00+00:00", "last_seen_at": "2026-07-30T10:00:00+00:00", "tags": ["Redis", "startup"]
+  },
+  {
+    "id": "bug_014", "fingerprint": "sqlalchemyerror|detached-instance", "error_type": "DetachedInstanceError", "error_message": "Instance is not bound to a Session",
+    "environment": "Python 3.11, SQLAlchemy 2", "context": "응답 직렬화 단계에서 관계 필드 접근 시 발생",
+    "root_cause": "세션 종료 뒤 lazy-loaded 관계를 읽어 세션에 연결되지 않은 객체를 사용했다.", "immediate_fix": "필요 관계를 eager load하거나 세션 안에서 DTO로 변환한다.",
+    "prevention_actions": ["ORM 응답 변환 규칙", "세션 종료 후 직렬화 테스트"], "external_sources": [], "status": "open", "occurrence_count": 1,
+    "first_seen_at": "2026-07-05T10:00:00+00:00", "last_seen_at": "2026-07-05T10:00:00+00:00", "tags": ["SQLAlchemy", "ORM"]
+  },
+  {
+    "id": "bug_015", "fingerprint": "memoryerror|large-csv", "error_type": "MemoryError", "error_message": "Unable to allocate array",
+    "environment": "Python 3.11, pandas 2.1.0", "context": "대용량 CSV를 한 번에 읽는 배치에서 발생",
+    "root_cause": "파일 크기와 메모리 제한을 고려하지 않고 전체 데이터를 메모리에 적재했다.", "immediate_fix": "chunksize로 나누어 처리한다.",
+    "prevention_actions": ["입력 크기 제한", "대용량 데이터 성능 테스트"], "external_sources": [], "status": "monitoring", "occurrence_count": 1,
+    "first_seen_at": "2026-07-03T10:00:00+00:00", "last_seen_at": "2026-07-03T10:00:00+00:00", "tags": ["pandas", "memory"]
+  }
+]
