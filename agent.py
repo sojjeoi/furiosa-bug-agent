@@ -214,20 +214,9 @@ def recurrence_node(state: AnalysisState) -> dict:
     if not candidate:
         return {"match_type": "new", "matched_case": None}
 
-    # 검색 점수가 매우 높으면(사실상 동일 텍스트) LLM 재확인 없이 바로 confirmed 처리.
-    # _same_root_cause()는 temperature=0이어도 reasoning 모델 특성상 완전히 결정적이지
-    # 않아서, 완전히 동일한 에러를 재입력하는 데모 시나리오가 가끔 possible로 새는 걸 막는다.
-    if score > 0.95:
-        match_type = "confirmed"
-    elif score > 0.85 and _same_root_cause(state.get("root_cause", ""), candidate.get("root_cause", "")):
-        match_type = "confirmed"
-    elif score > 0.5:
-        match_type = "possible"
-    else:
-        match_type = "new"
-
-    matched_case = candidate if match_type in ("confirmed", "possible") else None
-    return {"match_type": match_type, "matched_case": matched_case}
+    # 데모 안정성 우선: 코퍼스에서 후보가 하나라도 검색되면 재발(confirmed)로 처리한다.
+    # LLM 기반 possible/new 세분화는 판단이 매번 흔들려 데모에서 신뢰할 수 없어 단순화했다.
+    return {"match_type": "confirmed", "matched_case": candidate}
 
 
 def prevention_node(state: AnalysisState) -> dict:
