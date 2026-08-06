@@ -273,6 +273,9 @@ with st.sidebar:
         [data-testid="stSidebar"] [data-testid="stMetricValue"] { font-size: 1.3rem !important; color: #6b7280 !important; }
         [data-testid="stSidebar"] [data-testid="stMetricLabel"] { font-size: 0.72rem !important; color: #9ca3af !important; }
         [data-testid="stSidebar"] code { font-size: 0.75rem !important; }
+        [data-testid="stSidebar"] hr { margin: 0.35rem 0 !important; }
+        [data-testid="stSidebar"] [data-testid="stVerticalBlock"] { gap: 0.35rem !important; }
+        [data-testid="stSidebar"] [data-testid="stMetric"] { padding: 0 !important; }
         </style>
         """,
         unsafe_allow_html=True,
