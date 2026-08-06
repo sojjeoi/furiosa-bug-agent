@@ -14,13 +14,12 @@ import os
 import streamlit as st
 from dotenv import load_dotenv
 
-# --- 의존성 import (통합 시 여기만 교체) ------------------------------------
-from stubs import normalize_error_input, upsert_bug_case, app
+# --- 의존성 import (통합 완료 — 4개 실제 모듈 사용) --------------------------
+from vision import normalize_error_input    # B
+from rag import upsert_bug_case             # A
+from agent import app                       # C
 
-
-# from vision import normalize_error_input    # B — 완성됨. 실제 OCR을 쓰려면 이 줄로 교체
-# from rag import upsert_bug_case             # A
-# from agent import app                       # C
+# from stubs import normalize_error_input, upsert_bug_case, app  # 오프라인 테스트로 되돌리려면 이 줄로 교체
 # ---------------------------------------------------------------------------
 
 load_dotenv()
