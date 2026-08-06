@@ -120,9 +120,10 @@ def reset_analysis():
 # ===========================================================================
 # 화면
 # ===========================================================================
-st.set_page_config(page_title="사내 버그 지식 공유 Agent", page_icon="🐛")
+st.set_page_config(page_title="Bug Memory", page_icon="🐛")
 
-st.title("🐛 사내 버그 지식 공유 Agent")
+st.title("🐛 Bug Memory")
+st.markdown("##### 사내 버그 지식 공유 Agent")
 st.caption(
     "에러를 올리면 과거에 우리 팀이 같은 문제를 겪었는지 찾아 알려줍니다. "
     "승인한 기록만 코퍼스에 쌓입니다."
@@ -279,7 +280,7 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
-    st.title("🐛 Bug Agent")
+    st.title("🐛 Bug Memory")
 
     if st.button("＋ 새 오류 분석", use_container_width=True):
         reset_analysis()
