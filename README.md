@@ -19,10 +19,23 @@ Claude/ChatGPT에 그 순간만 물어보면 대화가 사라지지만, 이 에�
 
 | 담당 | 파일 | 역할 |
 |---|---|---|
-| A | `rag.py` | 코퍼스(`bugs.json`) 검색·저장, 임베딩+리랭커 |
-| B | `vision.py` | 스크린샷 OCR, 텍스트/이미지 입력 통합 |
-| C | `agent.py` | LangGraph 기반 Multi-Agent 분석 (원인분석/재발판정/예방조치) |
-| D | `ui.py` | Streamlit 화면, HITL 승인, LangSmith 연동 |
+| A | `app/rag.py` | 코퍼스(`app/bugs.json`) 검색·저장, 임베딩+리랭커 |
+| B | `app/vision.py` | 스크린샷 OCR, 텍스트/이미지 입력 통합 |
+| C | `app/agent.py` | LangGraph 기반 Multi-Agent 분석 (원인분석/재발판정/예방조치) |
+| D | `app/ui.py` | Streamlit 화면, HITL 승인, LangSmith 연동 |
+
+## 프로젝트 구조
+
+```
+furiosa-bug-agent/
+├── app/            실행 코드 — agent.py / rag.py / ui.py / vision.py / bugs.json
+│                   stubs.py (D 개발용 가짜 구현), test_rag.py (A 유닛 테스트)
+├── docs/           모듈별 설계 메모 (AGENT.md 등)
+├── assets/         테스트용 샘플 이미지
+├── requirements.txt
+├── README.md
+└── CLAUDE.md       AI 코딩 도구 작업 규칙 (루트 고정 — 도구가 자동으로 읽음)
+```
 
 ## 1. 설치
 
@@ -56,7 +69,7 @@ LANGSMITH_API_KEY=...
 ## 3. 실행
 
 ```bash
-python -m streamlit run ui.py
+python -m streamlit run app/ui.py
 ```
 
 브라우저가 자동으로 열립니다. 에러 메시지를 텍스트로 붙여넣거나 스크린샷을 업로드한 뒤 **[분석 시작]**을 누르면 됩니다. 분석 결과를 확인하고 **[승인하고 저장]**을 눌러야만 팀 코퍼스(`bugs.json`)에 반영됩니다.
