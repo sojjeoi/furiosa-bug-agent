@@ -87,7 +87,9 @@ python -m streamlit run app/ui.py
 
 스크린샷 업로드 → 재발 감지 → 원인·조치·과거 사례 → 승인까지 이어지는 실제 화면입니다.
 
-![Bug Memory 실행 화면 — 스크린샷 입력부터 재발 감지, 원인 분석, 과거 사례 참조, 승인까지](assets/demo-combined.png)
+<p align="center">
+  <img src="assets/demo-combined.png" alt="Bug Memory 실행 화면 — 스크린샷 입력부터 재발 감지, 원인 분석, 과거 사례 참조, 승인까지" width="340">
+</p>
 
 ## Non-goals (이번 스코프에서 하지 않는 것)
 
