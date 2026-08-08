@@ -9,12 +9,12 @@ Claude/ChatGPT에 그 순간만 물어보면 대화가 사라지지만, 이 에�
 
 ```
 스크린샷/텍스트 입력
-    → OCR·입력 정규화 (vision.py, B)
-    → 코퍼스 검색 (rag.py, A) — 임베딩 + 리랭커
-    → Multi-Agent 분석 (agent.py, C) — 원인분석 + 유사사례판단(Fan-out)
+    → OCR·입력 정규화 (app/vision.py, B)
+    → 코퍼스 검색 (app/rag.py, A) — 임베딩 + 리랭커
+    → Multi-Agent 분석 (app/agent.py, C) — 원인분석 + 유사사례판단(Fan-out)
          → 재발판정 → 예방조치생성 → 결과종합
-    → 화면 표시 + 사람 승인(HITL) (ui.py, D)
-    → 승인 시 rag.py의 upsert_bug_case()가 코퍼스에 반영
+    → 화면 표시 + 사람 승인(HITL) (app/ui.py, D)
+    → 승인 시 app/rag.py의 upsert_bug_case()가 코퍼스에 반영
 ```
 
 | 담당 | 파일 | 역할 |
@@ -72,7 +72,7 @@ LANGSMITH_API_KEY=...
 python -m streamlit run app/ui.py
 ```
 
-브라우저가 자동으로 열립니다. 에러 메시지를 텍스트로 붙여넣거나 스크린샷을 업로드한 뒤 **[분석 시작]**을 누르면 됩니다. 분석 결과를 확인하고 **[승인하고 저장]**을 눌러야만 팀 코퍼스(`bugs.json`)에 반영됩니다.
+브라우저가 자동으로 열립니다. 에러 메시지를 텍스트로 붙여넣거나 스크린샷을 업로드한 뒤 **[분석 시작]**을 누르면 됩니다. 분석 결과를 확인하고 **[승인하고 저장]**을 눌러야만 팀 코퍼스(`app/bugs.json`)에 반영됩니다.
 
 > 첫 분석은 여러 LLM 호출이 순차적으로 이어져서 다소 시간이 걸립니다(정상 동작입니다 — LangSmith 트레이스에서 각 단계 소요 시간을 확인할 수 있습니다).
 
